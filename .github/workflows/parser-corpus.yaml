@@ -1,0 +1,66 @@
+name: Parser corpus (MELPA)
+
+# Downloads a random sample of real .el source files from MELPA and parses them
+# with ferrel's lexer/parser (never evaluating or compiling them). Failures are
+# parser gaps; they are reported as a GitHub issue so they become test cases.
+
+on:
+  schedule:
+    # Weekly, Monday 06:00 UTC.
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+    inputs:
+      count:
+        description: "Number of MELPA packages to sample"
+        default: "50"
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  corpus:
+    name: Fetch and parse MELPA corpus
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Fetch corpus
+        run: |
+          chmod +x scripts/fetch-melpa-corpus.sh
+          COUNT="${{ github.event.inputs.count || '50' }}" \
+            OUTDIR=corpus scripts/fetch-melpa-corpus.sh
+
+      - name: Parse corpus (no evaluation)
+        id: parse
+        continue-on-error: true
+        run: cargo run --release --example corpus -- corpus
+
+      - name: Open or update tracking issue on failure
+        if: steps.parse.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create parser-corpus \
+            --description "Parser gaps found by the MELPA corpus job" \
+            --color B60205 2>/dev/null || true
+          title="Parser corpus failures ($(date -u +%Y-%m-%d))"
+          existing="$(gh issue list --label parser-corpus --state open \
+            --json number --jq '.[0].number' 2>/dev/null || true)"
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body-file corpus-report.md
+          else
+            gh issue create --title "$title" --label parser-corpus \
+              --body-file corpus-report.md
+          fi
+
+      - name: Reflect parse failures in the job status
+        if: steps.parse.outcome == 'failure'
+        run: |
+          echo "Parser corpus found failures; see the tracking issue." >&2
+          exit 1

@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  merge_group:
+    types: [checks_requested]
+
+jobs:
+  rust:
+    name: Rust (format, lint, test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - name: Install nightly rustfmt
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: rustfmt
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+      - name: Check formatting
+        run: make check-format
+      - name: Lint
+        run: make lint
+      - name: Test
+        run: make test
+      - name: Build
+        run: make build
+
+  elisp:
+    name: Verify generated Elisp in Emacs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+      - name: Install Emacs
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends emacs-nox
+      - name: Generate, byte-compile, and run the plugin
+        run: make verify-elisp

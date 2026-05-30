@@ -1,0 +1,34 @@
+version: 2
+
+# ferrel deliberately keeps a tiny, auditable dependency surface: the library
+# itself has zero runtime crates. Dependabot here watches the few moving parts
+# that do exist (CI actions, the docs site, and any future Cargo deps) so
+# security updates are surfaced as small, reviewable PRs.
+updates:
+  # Rust crates (currently none; this catches anything added later plus the
+  # lockfile). Keep this list small on purpose.
+  - package-ecosystem: "cargo"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "deps"
+
+  # GitHub Actions used by the workflows.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "ci"
+
+  # Documentation site (Docusaurus) dependencies.
+  - package-ecosystem: "npm"
+    directory: "/doc"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "docs"
