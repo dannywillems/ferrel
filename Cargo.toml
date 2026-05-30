@@ -21,6 +21,12 @@ syn = { version = "2.0.117", features = ["full"] }
 name = "ferrel-transpile"
 path = "src/bin/transpile.rs"
 
+# Regression tests live under tests/regression/ and are grouped into one test
+# crate via its main.rs aggregator. Add new regression files there as `mod`s.
+[[test]]
+name = "regression"
+path = "tests/regression/main.rs"
+
 [lints.rust]
 unsafe_code = "forbid"
 
