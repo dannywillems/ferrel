@@ -8,10 +8,13 @@ on:
   merge_group:
     types: [checks_requested]
 
+# Dependabot PRs only bump dependencies and do not (and should not) edit the
+# changelog, so the changelog checks are skipped for them.
 jobs:
   check-changelog:
     name: Check changelog action
     runs-on: ubuntu-latest
+    if: github.actor != 'dependabot[bot]'
     steps:
       - uses: tarides/changelog-check-action@v3
         with:
@@ -20,6 +23,7 @@ jobs:
   check-changelog-commit:
     name: Check changelog is in a dedicated commit
     runs-on: ubuntu-latest
+    if: github.actor != 'dependabot[bot]'
     steps:
       - uses: actions/checkout@v4
         with:
