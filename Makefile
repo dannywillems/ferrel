@@ -45,6 +45,18 @@ verify-elisp: example ## Byte-compile and load the generated plugin in Emacs
 			--eval '(princ (format "ok: %s\n" (ferrel-hello-double-sum 2 3)))' && \
 		rm -f ferrel-hello.elc
 
+.PHONY: transpile-example
+transpile-example: ## Transpile examples/sample_config.rs to examples/out/
+	cargo run --bin ferrel-transpile -- \
+		examples/sample_config.rs -o examples/out/sample-config.el
+
+.PHONY: verify-transpile
+verify-transpile: ## Transpile the sample config and byte-compile it cleanly
+	EMACS=$${EMACS:-emacs} cargo run --bin ferrel-transpile -- \
+		examples/sample_config.rs -o examples/out/sample-config.el \
+		--byte-compile && \
+		rm -f examples/out/sample-config.elc
+
 .PHONY: corpus-fetch
 corpus-fetch: ## Download a random MELPA .el corpus into corpus/ (COUNT=50)
 	COUNT=$${COUNT:-50} OUTDIR=corpus scripts/fetch-melpa-corpus.sh

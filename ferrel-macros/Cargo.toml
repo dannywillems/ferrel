@@ -1,0 +1,19 @@
+[package]
+name = "ferrel-macros"
+version = "0.1.0"
+edition = "2024"
+description = "Inert attribute macros for ferrel transpiler input (interactive, elisp)."
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/dannywillems/ferrel"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2 = "1.0.106"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = "warn"

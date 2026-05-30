@@ -46,13 +46,13 @@
 
 //! ## Compiler pipeline
 //!
-//! ferrel is structured as a small compiler with two directions sharing one
-//! AST ([`Sexp`]):
+//! ferrel is structured as a small compiler with several front-ends sharing one
+//! AST ([`Sexp`]) and one back-end (the renderer):
 //!
 //! ```text
-//!   .el text --[lexer]--> tokens --[parser]--> Sexp --[codegen]--> .el text
-//!                                               ^
-//!   Rust eDSL (El<T>, typed authoring layer) ---+
+//!   .el text     --[lexer]--> tokens --[parser]--> Sexp --[codegen]--> .el text
+//!   Rust eDSL (El<T>, typed authoring layer) -----> Sexp
+//!   Rust source subset --[syn]--> Rust AST --[lower]-> Sexp
 //! ```
 //!
 //! - `lexer` (private): text to spanned tokens.
@@ -60,8 +60,12 @@
 //!   [`parse_one`].
 //! - [`Sexp`]: the untyped AST and the code generator (`render`).
 //! - The typed layer ([`El<T>`], builders) lowers into [`Sexp`] for generation.
+//! - The [`transpile`] front-end reads a subset of real Rust via `syn` and
+//!   lowers it into [`Sexp`]; see [`transpile_str`] and [`transpile_file`]. The
+//!   [`rt`] prelude supplies the zero-cost stubs that make transpiler input
+//!   compile as ordinary safe Rust.
 //!
-//! Because both directions share [`Sexp`], the pipeline round-trips: parsing
+//! Because every front-end shares [`Sexp`], the pipeline round-trips: parsing
 //! then rendering reproduces an equivalent file, and rendering then parsing
 //! reproduces an equal AST.
 
@@ -80,8 +84,10 @@ mod key;
 mod lexer;
 mod package;
 mod parser;
+pub mod rt;
 mod sexp;
 mod stmt;
+pub mod transpile;
 mod typed;
 mod use_package;
 
@@ -95,6 +101,7 @@ pub use package::Package;
 pub use parser::{ParseError, parse, parse_one};
 pub use sexp::Sexp;
 pub use stmt::Stmt;
+pub use transpile::{TranspileError, transpile_file, transpile_str};
 pub use typed::{
     Any, Bool, El, Float, Int, IntoSexp, List, Str, Symbol, add, boolean, buffer_name, call,
     call_typed, concat, equal, executable_find, expand_file_name, float, format,

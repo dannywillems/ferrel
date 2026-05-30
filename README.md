@@ -90,19 +90,50 @@ The reader covers the core surface syntax (numbers including radixes, characters
 strings, symbols and keywords, the quoting shorthands, proper and dotted lists,
 and vectors) and is verified to round-trip a real modular Emacs config.
 
-## Roadmap: the Rust-to-Elisp transpiler
+## Transpiling Rust to Elisp
 
-A third front-end, under active development, lets you write a defined subset of
-real, compilable Rust and transpile it to Elisp. The design is fixed:
+A third front-end lets you write a defined subset of real, compilable Rust and
+transpile it to Elisp. You write ordinary Rust functions; `rustc` type-checks
+them, and `ferrel-transpile` lowers them to `.el`:
+
+```rust
+use ferrel::rt::*;
+
+#[elisp(name = "1+")]
+fn inc(n: i64) -> i64 { unreachable!() } // FFI: declares the Elisp `1+`
+
+/// Insert NUM blank lines at point.
+#[interactive("p")]
+fn my_insert_blank_lines(num: i64) {
+    let total = inc(num);
+    for _i in 0..total {
+        insert("\n");
+    }
+}
+```
+
+```sh
+ferrel-transpile config.rs -o config.el            # .rs in, .el out
+ferrel-transpile config.rs --byte-compile          # also drive Emacs to .elc
+```
+
+The design is fixed and enforced:
 
 - The input is valid, type-checked Rust, so `rustc` is the type checker. The
-  transpiler accepts only a subset of the grammar and refuses anything outside
-  it with a located error, never a silent mistranslation.
-- External Elisp is called through a typed foreign-function interface: you
-  declare the functions you use with Rust signatures, and ferrel maps the names
-  (`snake_case` to `kebab-case`).
+  transpiler accepts only a subset of the grammar (`fn`, `let`, `if`/`match`,
+  `while`, `for`, operators, calls, closures) and refuses anything outside it
+  with a located `line:col` error, never a silent mistranslation.
+- External Elisp is called through a typed foreign-function interface: declare
+  functions with `#[elisp]` (names map `snake_case` to `kebab-case`, with an
+  override for names like `1+`), and use the `sym`/`func`/`kbd`/`raw` intrinsics
+  for symbols, function references, key sequences, and verbatim escapes. The
+  `ferrel::rt` prelude provides safe stubs so your `.rs` compiles as ordinary
+  Rust.
 - It ships as a `.rs`-in `.el`-out CLI, with optional flags that drive Emacs to
   also produce byte-compiled (`.elc`) and native (`.eln`) output.
+
+See `examples/sample_config.rs` for a realistic config in the subset; its
+transpiled output byte-compiles cleanly in Emacs.
 
 ## Testing
 
@@ -146,8 +177,10 @@ judged by the reviewer; correctness is owned by the engineer.
 ## Status
 
 The core (AST, lexer, parser, renderer, typed layer, builders, package writer)
-works and is verified against batch Emacs. The typed builtin surface grows as
-real configuration is ported. The Rust transpiler front-end is in progress.
+works and is verified against batch Emacs. The Rust-to-Elisp transpiler covers a
+useful subset and refuses the rest with located errors; its sample output
+byte-compiles cleanly. The typed builtin surface and the transpiler subset both
+grow as real configuration is ported.
 
 ## License
 
