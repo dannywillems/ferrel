@@ -52,6 +52,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   `--native-compile` flags that drive Emacs; the in-repo `ferrel-macros`
   proc-macro crate provides the inert `#[elisp]`/`#[interactive]` attributes
   (the crate is now a workspace).
+- Transpiler regression suite under `tests/regression/` (grouped as the
+  `regression` test crate): a readable table of Rust inputs and the exact Elisp
+  they lower to, plus refusal cases that pin the `line:col` errors for
+  unsupported syntax.
+- `examples/config_git.rs`: a step-by-step port of a real `git.el` module to the
+  typed `UsePackage` builder, with the parts the builder does not model yet
+  flagged inline.
 - MELPA corpus tooling: `scripts/fetch-melpa-corpus.sh` and the `corpus` example
   parse random real packages (never evaluating them) to surface parser gaps,
   wired into a scheduled CI job that files an issue on failure.
