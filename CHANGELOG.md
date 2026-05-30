@@ -37,7 +37,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   `bind_key`, and the `kbd!` macro.
 - `CustomType` enum and the `Defcustom` builder (with `:type` inference);
   `Package::push_form` / `extend_forms`; literal `From` conversions for `El<T>`.
-- Docusaurus documentation site scaffold under `doc/`.
+- Rust-to-Elisp transpiler: a third front-end that lowers a defined subset of
+  real, type-checked Rust (parsed with `syn`) into the `Sexp` IR. Covers `fn`,
+  `const`/`static`, `let`, assignment, `if`/`match` (`pcase` with or-patterns
+  and guards), `when`, `while`, `for`/`dolist`/`dotimes`, closures, operators,
+  calls, and `format!`/`println!`. Anything outside the subset is refused with a
+  `line:col` `TranspileError` rather than mistranslated. Public API
+  `transpile_str` / `transpile_file`.
+- Typed foreign-function interface for the transpiler: `#[elisp]` declarations
+  (with `#[elisp(name = "...")]` overrides) and the `sym`/`func`/`kbd`/`raw`
+  intrinsics, backed by the safe-stub `ferrel::rt` prelude so transpiled code
+  compiles as ordinary Rust.
+- `ferrel-transpile` CLI (`.rs` in, `.el` out) with `--byte-compile` and
+  `--native-compile` flags that drive Emacs; the in-repo `ferrel-macros`
+  proc-macro crate provides the inert `#[elisp]`/`#[interactive]` attributes
+  (the crate is now a workspace).
+- MELPA corpus tooling: `scripts/fetch-melpa-corpus.sh` and the `corpus` example
+  parse random real packages (never evaluating them) to surface parser gaps,
+  wired into a scheduled CI job that files an issue on failure.
+- Reusable agents under `.claude/agents/` (`ferrel-compiler-engineer`,
+  `ferrel-rust-api-reviewer`) encoding the maintainer/reviewer split.
+- Docusaurus documentation site under `doc/`, including a graduate-level Emacs
+  Lisp course (history, syntax, semantics, loading, the `.elc` format) and a
+  compiler-internals section.
 - GitHub Actions CI: Rust (fmt, clippy, test, build), generated-Elisp
   byte-compilation in Emacs, changelog and PR-hygiene checks, shellcheck, and a
   documentation build/deploy workflow.
