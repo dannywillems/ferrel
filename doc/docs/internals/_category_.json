@@ -1,0 +1,9 @@
+{
+  "label": "Compiler internals",
+  "position": 4,
+  "link": {
+    "type": "generated-index",
+    "title": "How ferrel works inside",
+    "description": "A working tour of the compiler techniques ferrel is built from: the narrow-waist IR, lexing and parsing, lowering and desugaring, the typed foreign-function interface, and how a compiler like this is tested."
+  }
+}

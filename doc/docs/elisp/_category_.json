@@ -1,0 +1,9 @@
+{
+  "label": "Emacs Lisp (a course)",
+  "position": 3,
+  "link": {
+    "type": "generated-index",
+    "title": "Emacs Lisp: a graduate course",
+    "description": "A rigorous tour of Emacs Lisp for people who want to understand the language ferrel generates: its history, its full reader syntax, its evaluation semantics, how Emacs loads and compiles it, and the byte-code format underneath."
+  }
+}
