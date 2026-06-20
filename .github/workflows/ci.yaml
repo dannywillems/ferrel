@@ -13,7 +13,7 @@ jobs:
     name: Rust (format, lint, test)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       # Install nightly first (for rustfmt), then stable last so that the
       # default toolchain for `cargo clippy`/`cargo test` is stable, which is
       # where the clippy component lives.
@@ -40,7 +40,7 @@ jobs:
     name: Verify generated Elisp in Emacs
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
       - name: Cache cargo
