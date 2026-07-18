@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.actor != 'dependabot[bot]'
     steps:
-      - uses: tarides/changelog-check-action@v3
+      - uses: tarides/changelog-check-action@v4
         with:
           changelog: CHANGELOG.md
 
