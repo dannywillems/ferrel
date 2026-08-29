@@ -15,7 +15,7 @@ members = ["ferrel-macros"]
 [dependencies]
 ferrel-macros = { version = "0.1.0", path = "ferrel-macros" }
 proc-macro2 = { version = "1.0.106", features = ["span-locations"] }
-syn = { version = "2.0.117", features = ["full"] }
+syn = { version = "3.0.4", features = ["full"] }
 
 [[bin]]
 name = "ferrel-transpile"
